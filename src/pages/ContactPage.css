@@ -1,0 +1,118 @@
+.contact-page {
+  padding: var(--space-3) 0;
+}
+
+.contact-content {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: var(--color-white);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px 0 rgba(0,173,166,0.07);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  transition: box-shadow 0.2s;
+}
+.contact-item:hover {
+  box-shadow: 0 6px 24px 0 rgba(0,173,166,0.13);
+}
+
+.contact-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+
+.contact-details {
+  flex: 1;
+}
+
+.contact-details h3 {
+  margin: 0 0 0.2rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.contact-details p {
+  margin: 0 0 0.3rem 0;
+  color: var(--color-dark-gray);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.contact-button {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  margin-top: 0.3rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.contact-button:hover {
+  background: var(--color-action);
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+}
+
+.contact-hours {
+  background-color: var(--color-light-gray);
+  padding: var(--space-2);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+}
+
+.contact-hours h3 {
+  color: var(--color-dark-gray);
+  margin-bottom: var(--space-1);
+}
+
+.contact-hours p {
+  color: var(--color-gray);
+}
+
+/* Tablet and Mobile styles */
+@media (max-width: 1024px) {
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .contact-content {
+    padding: var(--space-2);
+  }
+  
+  .contact-item {
+    padding: var(--space-1);
+  }
+}
