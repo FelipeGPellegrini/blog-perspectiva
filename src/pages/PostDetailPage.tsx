@@ -15,11 +15,12 @@ import './PostDetailPage.css';
 interface StrapiRichTextNode { type: 'text'; text: string; bold?: boolean; italic?: boolean; underline?: boolean; strikethrough?: boolean; code?: boolean; }
 interface StrapiRichTextBlock { type: 'paragraph' | 'heading' | 'list' | 'quote'; children: StrapiRichTextNode[]; level?: 1 | 2 | 3 | 4 | 5 | 6; }
 
-const API_BASE_URL = 'http://172.16.40.195:1337/api/posts';
+const strapiUrl = import.meta.env.VITE_API_URL;
+const API_BASE_URL = `${strapiUrl}/api/posts`;
 
 const getImageUrl = (strapiImageObject: any): string => {
   const fallbackImage = 'https://via.placeholder.com/1200x600.png?text=Imagem+Nao+Encontrada';
-  if (strapiImageObject?.url) { return `http://172.16.40.195:1337${strapiImageObject.url}`; }
+  if (strapiImageObject?.url) { return `${strapiImageObject.url}`; }
   return fallbackImage;
 };
 
@@ -78,7 +79,7 @@ const PostDetailPage: React.FC = () => {
             date: strapiPost.date,
             tags: Array.isArray(strapiPost.tags) ? strapiPost.tags : [strapiPost.tags],
             image: getImageUrl(strapiPost.image),
-            gallery: strapiPost.gallery?.map(img => `http://172.16.40.195:1337${img.url}`) || [],
+            gallery: strapiPost.gallery?.map(img => `${img.url}`) || [],
             createdAt: strapiPost.createdAt,
             updatedAt: strapiPost.updatedAt,
             publishedAt: strapiPost.publishedAt,

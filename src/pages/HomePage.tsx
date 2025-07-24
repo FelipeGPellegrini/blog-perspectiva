@@ -9,14 +9,14 @@ import './HomePage.css';
 import BannerAd from '../components/BannerAd';
 import PostCard from '../components/blog/PostCard';
 
-const API_URL = 'http://172.16.40.195:1337/api/posts?populate=*&sort=date:desc';
+const strapiUrl = import.meta.env.VITE_API_URL;
+const API_URL = `${strapiUrl}/api/posts?populate=*&sort=date:desc`;
 
 const getImageUrl = (strapiImageObject: StrapiPost['image']): string => {
   const fallbackImage = 'https://via.placeholder.com/800x450.png?text=Imagem+Nao+Encontrada';
   // A estrutura da sua imagem é um pouco diferente, acessamos 'url' diretamente
   if (strapiImageObject?.url) {
-    const strapiUrl = 'http://172.16.40.195:1337';
-    return `${strapiUrl}${strapiImageObject.url}`;
+    return `${strapiImageObject.url}`;
   }
   return fallbackImage;
 };
@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
             date: strapiPost.date,
             tags: tagsArr,
             image: getImageUrl(strapiPost.image),
-            gallery: strapiPost.gallery?.map(img => `http://172.16.40.195:1337${img.url}`) || [],
+            gallery: strapiPost.gallery?.map(img => `${strapiUrl}${img.url}`) || [],
             createdAt: strapiPost.createdAt,
             updatedAt: strapiPost.updatedAt,
             publishedAt: strapiPost.publishedAt,
@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
             imageMobile="/banner-mobile-home.jpg"
             fallbackDesktop="/banner-desktop-home.jpg"
             fallbackMobile="/banner-mobile-home.jpg"
-            link="https://seucurso.com"
+            link="https://pmesp.cursoperspectiva.com/soldado-pmesp"
             alt="Banner do Curso Perspectiva"
           />
           {/* Listagem de posts com grid e estilo correto */}

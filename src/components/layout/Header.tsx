@@ -25,7 +25,7 @@ const Header: React.FC = () => {
         <div className="logo-container">
           <Link to="/" className="logo-link" aria-label="Perspectiva - Home">
             <div className="logo fade-in">
-              <img src={logo} alt="Perspectiva" style={{ width: 120, height: 'auto', filter: 'drop-shadow(0 2px 8px rgba(0,173,166,0.10))' }} />
+              <img src={logo} alt="Perspectiva" style={{ width: 80, height: 'auto', filter: 'drop-shadow(0 2px 8px rgba(0,173,166,0.10))' }} />
             </div>
           </Link>
         </div>

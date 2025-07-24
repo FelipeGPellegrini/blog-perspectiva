@@ -5,7 +5,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: var(--space-2) 0;
+  padding: var(--space-1) 0;
   margin-bottom: 0;
   transition: box-shadow var(--transition-normal), background var(--transition-normal);
 }
@@ -40,7 +40,7 @@
 }
 
 .logo img {
-  width: 120px;
+  width: 80px;
   height: auto;
   transition: filter var(--transition-normal);
   filter: drop-shadow(0 2px 8px rgba(0,173,166,0.10)) brightness(1.1);
@@ -98,7 +98,7 @@
     padding: 0 var(--space-1);
   }
   .logo img {
-    width: 90px;
+    width: 60px;
   }
 }
 
