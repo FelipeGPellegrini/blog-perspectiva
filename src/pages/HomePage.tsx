@@ -1,3 +1,5 @@
+// src/pages/HomePage.tsx
+
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PostList from '../components/blog/PostList';
@@ -7,14 +9,38 @@ import '../components/blog/TagFilter.css';
 import BannerAd from '../components/BannerAd';
 import Pagination from '../components/Pagination';
 
+// ✅ Tipos ajustados para a estrutura REAL da sua API (sem 'attributes')
+interface StrapiImage {
+  data: {
+    attributes: {
+      url: string;
+    };
+  } | null;
+}
+interface StrapiPost {
+  id: number;
+  title: string;
+  subtitle: string;
+  date: string;
+  image: StrapiImage | null; // A imagem pode não existir
+  tags: string | null;      // As tags podem não existir
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+}
+interface StrapiApiResponse {
+  data: (StrapiPost | null)[]; // A API pode retornar itens nulos no array
+}
+
 const strapiUrl = import.meta.env.VITE_API_URL;
 const PAGE_SIZE = 8;
 
-// A função getImageUrl continua a mesma, está correta.
-const getImageUrl = (strapiImageObject: any): string => {
+// Função de imagem ajustada para ser mais segura
+const getImageUrl = (strapiImage: StrapiImage | null): string => {
   const fallbackImage = 'https://via.placeholder.com/800x450.png?text=Imagem+Nao+Encontrada';
-  if (strapiImageObject?.url) {
-    const imageUrl = strapiImageObject.url;
+  const imageUrl = strapiImage?.data?.attributes?.url;
+
+  if (imageUrl) {
     if (imageUrl.startsWith('http')) {
       return imageUrl;
     }
@@ -35,38 +61,46 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    // A URL de fetch pode ser mais simples se 'tags' é só um campo de texto
+    // A query `populate=image` é importante para garantir que os dados da imagem venham
     const allDataUrl = `${strapiUrl}/api/posts?populate=image&sort=date:desc&pagination[pageSize]=200`;
 
     fetch(allDataUrl)
       .then(res => res.json())
-      .then((apiResponse: any) => {
+      .then((apiResponse: StrapiApiResponse) => {
         const postsData = apiResponse.data || [];
 
-        // ✅ 1. MAPEAMENTO CORRETO PARA TAGS EM STRING
-        const formattedPosts: Post[] = postsData.map((post: any) => {
-          const attributes = post.attributes || post;
-          // Converte a string de tags em um array de strings
-          const tagsArray = typeof attributes.tags === 'string'
-            ? attributes.tags.split(',').map(t => t.trim()).filter(t => t) // Remove tags vazias
-            : [];
+        // ✅ LÓGICA DE MAPEAMENTO CORRIGIDA
+        const formattedPosts: Post[] = postsData
+          // 1. Filtra qualquer post que seja nulo ou indefinido na resposta da API
+          .filter((post): post is StrapiPost => post !== null && post !== undefined)
+          // 2. Mapeia os posts válidos
+          .map((post: StrapiPost) => {
+            
+            // ❌ REMOVIDO: const { attributes } = post;
+            // ✅ CORREÇÃO: Acessamos `post.tags` e `post.title` diretamente.
+            
+            const tagsArray = typeof post.tags === 'string'
+              ? post.tags.split(',').map(t => t.trim()).filter(t => t)
+              : [];
 
-          return {
-            id: post.id,
-            title: attributes.title,
-            subtitle: attributes.subtitle,
-            date: attributes.date,
-            image: getImageUrl(attributes.image?.data?.attributes),
-            tags: tagsArray, // Salva o array de tags
-            content: '', gallery: [],
-            createdAt: attributes.createdAt,
-            updatedAt: attributes.updatedAt,
-            publishedAt: attributes.publishedAt,
-          };
-        });
+            return {
+              id: post.id,
+              title: post.title,
+              subtitle: post.subtitle,
+              date: post.date,
+              image: getImageUrl(post.image),
+              tags: tagsArray,
+              // Campos padrão
+              content: '', 
+              gallery: [],
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              publishedAt: post.publishedAt,
+            };
+          });
         setAllPosts(formattedPosts);
 
-        // ✅ 2. EXTRAÇÃO DE TAGS ÚNICAS A PARTIR DO ARRAY
+        // A lógica de extração de tags a partir daqui já estava correta
         const allTagNames = new Set<string>();
         formattedPosts.forEach(p => {
           p.tags.forEach(tagName => allTagNames.add(tagName));
@@ -75,21 +109,24 @@ const HomePage: React.FC = () => {
         const formattedTags: Tag[] = Array.from(allTagNames).map((name, index) => ({ id: index, name }));
         setAvailableTags(formattedTags);
       })
-      .catch(error => console.error("☠️ Falha ao buscar dados iniciais.", error))
+      .catch(error => {
+        // O erro que você viu será capturado aqui
+        console.error("☠️ Falha ao processar dados iniciais. Verifique a estrutura do JSON.", error);
+      })
       .finally(() => setLoading(false));
   }, []);
 
+  // O restante do componente (lógica de paginação e JSX) não precisa de mudanças
+  // e funcionará corretamente com os dados corrigidos.
+
   useEffect(() => {
-    // ✅ 3. FILTRO FUNCIONANDO CORRETAMENTE COM O ARRAY DE TAGS
     const filteredPosts = tag
-      ? allPosts.filter(post => post.tags.includes(tag))
+      ? allPosts.filter(p => p.tags.includes(tag))
       : allPosts;
 
     setPageCount(Math.ceil(filteredPosts.length / PAGE_SIZE));
-
     const startIndex = (currentPage - 1) * PAGE_SIZE;
     const paginatedPosts = filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
-    
     setDisplayedPosts(paginatedPosts);
   }, [tag, currentPage, allPosts]);
 
@@ -105,7 +142,6 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    // O JSX restante está correto e não precisa de alterações.
     <div className="container home-page">
       <BannerAd
         imageDesktop="/banner-desktop-home.jpg"
