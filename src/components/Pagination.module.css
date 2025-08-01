@@ -1,0 +1,73 @@
+/* src/components/Pagination.module.css */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem; /* Espaçamento entre os elementos */
+    margin: 2.5rem 0 1.5rem; /* Espaçamento acima e abaixo */
+    user-select: none; /* Impede que o texto seja selecionado */
+  }
+  
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 50%; /* Deixa os botões redondos */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  }
+  
+  .button svg {
+    width: 20px;
+    height: 20px;
+    stroke: #333;
+    transition: stroke 0.2s;
+  }
+  
+  .button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+  }
+  
+  .button:hover:not(:disabled) svg {
+    stroke: #007bff;
+  }
+  
+  .button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  
+  .pageInfo {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    min-width: 120px; /* Evita que o layout "pule" quando os números mudam */
+    text-align: center;
+  }
+  
+  /* --- Estilos para Telas Pequenas (Responsivo) --- */
+  @media (max-width: 480px) {
+    .pagination {
+      gap: 0.5rem;
+    }
+    
+    .button {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .pageInfo {
+      font-size: 0.9rem;
+      min-width: 100px;
+    }
+  }

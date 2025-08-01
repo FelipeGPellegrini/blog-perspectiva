@@ -1,0 +1,40 @@
+.blog-header {
+    text-align: center;
+    padding: var(--space-4) 0 var(--space-2); /* 32px top, 16px bottom */
+    margin-bottom: var(--space-3); /* Space before the banner ad */
+  }
+  
+  .blog-title {
+    font-size: var(--font-size-4xl); /* 36px */
+    font-weight: 800; /* Extra bold for impact */
+    color: var(--color-dark-gray);
+    display: inline-block; /* Allows for the pseudo-element to be positioned correctly */
+    position: relative;
+    margin: 0;
+  }
+  
+  .blog-title-highlight {
+    color: var(--color-secondary); /* The eye-catching green */
+  }
+  
+  /* Adds the decorative underline */
+  .blog-title::after {
+    content: '';
+    display: block;
+    width: 90px; /* Width of the underline */
+    height: 4px;
+    background-color: var(--color-primary); /* The main brand color */
+    border-radius: var(--border-radius-sm);
+    margin: var(--space-1) auto 0; /* Centered with space on top */
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .blog-title {
+      font-size: var(--font-size-3xl); /* 30px on smaller screens */
+    }
+  
+    .blog-header {
+      margin-bottom: var(--space-2);
+    }
+  }

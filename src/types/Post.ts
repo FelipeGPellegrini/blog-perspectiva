@@ -40,3 +40,20 @@ export interface StrapiPost {
   bannerImage?: StrapiMedia; // Objeto de mídia do Strapi
   bannerLink?: string;
 }
+
+export interface StrapiResponse<T> {
+  data: T;
+  meta: {
+    pagination: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+}

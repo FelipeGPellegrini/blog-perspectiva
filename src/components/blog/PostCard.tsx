@@ -21,11 +21,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, featured = false }) => {
       <Link to={`/post/${post.id}`} className="post-card-link">
         <div className="post-card-image-container">
           <img src={post.image} alt={post.title} className="post-card-image" />
-          {post.tags.length > 0 && (
-            <div className="post-card-tag">
-              {post.tags[0]}
-            </div>
-          )}
+          {post.tags && typeof post.tags === 'string' && (
+  <div className="post-card-tag">
+    {/* Pega o texto 'PMESP, SP', divide em ['PMESP', 'SP'] e pega o primeiro item */}
+    {post.tags.split(', ')[0]}
+  </div>
+)}
         </div>
         <div className="post-card-content">
           <h3 className="post-card-title">{post.title}</h3>

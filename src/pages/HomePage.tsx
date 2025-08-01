@@ -1,110 +1,137 @@
-// src/pages/HomePage.tsx - VERSÃO CORRIGIDA
-
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import PostList from '../components/blog/PostList';
-import TagFilter from '../components/blog/TagFilter';
-import { Post, StrapiPost } from '../types/Post';
+import { Post, Tag } from '../types/Post';
 import './HomePage.css';
+import '../components/blog/TagFilter.css';
 import BannerAd from '../components/BannerAd';
-import PostCard from '../components/blog/PostCard';
+import Pagination from '../components/Pagination';
 
 const strapiUrl = import.meta.env.VITE_API_URL;
-const API_URL = `${strapiUrl}/api/posts?populate=*&sort=date:desc`;
+const PAGE_SIZE = 8;
 
-const getImageUrl = (strapiImageObject: StrapiPost['image']): string => {
+// A função getImageUrl continua a mesma, está correta.
+const getImageUrl = (strapiImageObject: any): string => {
   const fallbackImage = 'https://via.placeholder.com/800x450.png?text=Imagem+Nao+Encontrada';
-  // A estrutura da sua imagem é um pouco diferente, acessamos 'url' diretamente
   if (strapiImageObject?.url) {
-    return `${strapiImageObject.url}`;
+    const imageUrl = strapiImageObject.url;
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    return `${strapiUrl}${imageUrl}`;
   }
   return fallbackImage;
 };
 
 const HomePage: React.FC = () => {
   const { tag } = useParams<{ tag: string }>();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(true);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<Post[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
     setLoading(true);
-    fetch(API_URL)
+    // A URL de fetch pode ser mais simples se 'tags' é só um campo de texto
+    const allDataUrl = `${strapiUrl}/api/posts?populate=image&sort=date:desc&pagination[pageSize]=200`;
+
+    fetch(allDataUrl)
       .then(res => res.json())
-      .then((apiResponse: { data: StrapiPost[] }) => {
-        // ---- AJUSTE PRINCIPAL AQUI ----
-        // Mapeamos a resposta do Strapi, acessando os campos DIRETAMENTE do objeto `strapiPost`
-        const formattedPosts: Post[] = apiResponse.data.map(strapiPost => {
-          let tagsArr: string[] = [];
-          if (Array.isArray(strapiPost.tags)) {
-            tagsArr = strapiPost.tags;
-          } else if (typeof strapiPost.tags === 'string') {
-            tagsArr = strapiPost.tags.split(',').map(t => t.trim()).filter(Boolean);
-          }
+      .then((apiResponse: any) => {
+        const postsData = apiResponse.data || [];
+
+        // ✅ 1. MAPEAMENTO CORRETO PARA TAGS EM STRING
+        const formattedPosts: Post[] = postsData.map((post: any) => {
+          const attributes = post.attributes || post;
+          // Converte a string de tags em um array de strings
+          const tagsArray = typeof attributes.tags === 'string'
+            ? attributes.tags.split(',').map(t => t.trim()).filter(t => t) // Remove tags vazias
+            : [];
+
           return {
-            id: strapiPost.id,
-            title: strapiPost.title,
-            subtitle: strapiPost.subtitle,
-            content: Array.isArray(strapiPost.content) ? JSON.stringify(strapiPost.content) : strapiPost.content,
-            date: strapiPost.date,
-            tags: tagsArr,
-            image: getImageUrl(strapiPost.image),
-            gallery: strapiPost.gallery?.map(img => `${strapiUrl}${img.url}`) || [],
-            createdAt: strapiPost.createdAt,
-            updatedAt: strapiPost.updatedAt,
-            publishedAt: strapiPost.publishedAt,
+            id: post.id,
+            title: attributes.title,
+            subtitle: attributes.subtitle,
+            date: attributes.date,
+            image: getImageUrl(attributes.image?.data?.attributes),
+            tags: tagsArray, // Salva o array de tags
+            content: '', gallery: [],
+            createdAt: attributes.createdAt,
+            updatedAt: attributes.updatedAt,
+            publishedAt: attributes.publishedAt,
           };
         });
+        setAllPosts(formattedPosts);
+
+        // ✅ 2. EXTRAÇÃO DE TAGS ÚNICAS A PARTIR DO ARRAY
+        const allTagNames = new Set<string>();
+        formattedPosts.forEach(p => {
+          p.tags.forEach(tagName => allTagNames.add(tagName));
+        });
         
-        setPosts(formattedPosts);
-
-        const tags = formattedPosts.reduce((acc: string[], post) => {
-          if (post.tags) {
-             return [...acc, ...post.tags];
-          }
-          return acc;
-        }, []);
-        setAllTags([...new Set(tags)]);
-
+        const formattedTags: Tag[] = Array.from(allTagNames).map((name, index) => ({ id: index, name }));
+        setAvailableTags(formattedTags);
       })
-      .catch(error => {
-        console.error("☠️ Falha grave ao buscar posts no Strapi. O backend está rodando?", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(error => console.error("☠️ Falha ao buscar dados iniciais.", error))
+      .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    // ✅ 3. FILTRO FUNCIONANDO CORRETAMENTE COM O ARRAY DE TAGS
+    const filteredPosts = tag
+      ? allPosts.filter(post => post.tags.includes(tag))
+      : allPosts;
+
+    setPageCount(Math.ceil(filteredPosts.length / PAGE_SIZE));
+
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const paginatedPosts = filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
+    
+    setDisplayedPosts(paginatedPosts);
+  }, [tag, currentPage, allPosts]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tag]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= pageCount) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
+    // O JSX restante está correto e não precisa de alterações.
     <div className="container home-page">
-      <header className="page-header">
-        <h1 className="page-title">
-          {tag ? `Posts sobre "${tag}"` : 'Blog Perspectiva'}
-        </h1>
-        <p className="page-subtitle">
-          {tag 
-            ? `Confira nossos artigos sobre ${tag}` 
-            : 'Conteúdo inovador, dicas e perspectivas para quem busca crescer e se atualizar.'}
-        </p>
-      </header>
-      
+      <BannerAd
+        imageDesktop="/banner-desktop-home.jpg"
+        imageMobile="/banner-mobile-home.jpg"
+        link="https://pmesp.cursoperspectiva.com/soldado-pmesp"
+        alt="Banner do Curso Perspectiva"
+      />
+      <div className="tag-filter-container">
+        <h3 className="tag-filter-title">Filtrar por Assunto</h3>
+        <nav className="tag-cloud">
+          <Link to="/" className={`tag-item ${!tag ? 'active' : ''}`}>Todos</Link>
+          {availableTags.map(t => (
+            <Link to={`/tag/${t.name}`} key={t.id} className={`tag-item ${tag === t.name ? 'active' : ''}`}>{t.name}</Link>
+          ))}
+        </nav>
+      </div>
       {loading ? (
-        <div className='text-center p-10'>Carregando posts...</div>
+        <div className='text-center p-10 font-semibold'>Carregando...</div>
       ) : (
         <>
-          <TagFilter tags={allTags} />
-          {/* Banner principal após o header */}
-          {/* Troque as imagens e o link abaixo pelo seu banner de curso */}
-          <BannerAd
-            imageDesktop="/banner-desktop-home.jpg"
-            imageMobile="/banner-mobile-home.jpg"
-            fallbackDesktop="/banner-desktop-home.jpg"
-            fallbackMobile="/banner-mobile-home.jpg"
-            link="https://pmesp.cursoperspectiva.com/soldado-pmesp"
-            alt="Banner do Curso Perspectiva"
-          />
-          {/* Listagem de posts com grid e estilo correto */}
-          <PostList posts={posts} filteredTag={tag} />
+          {displayedPosts.length > 0 ? (
+            <PostList posts={displayedPosts} />
+          ) : (
+            <div className='text-center p-10 font-semibold'>Nenhum post encontrado para esta seleção.</div>
+          )}
+          <Pagination currentPage={currentPage} pageCount={pageCount} onPageChange={handlePageChange} />
         </>
       )}
     </div>
