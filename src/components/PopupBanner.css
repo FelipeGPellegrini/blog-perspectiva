@@ -1,0 +1,93 @@
+/* Define a animação de subida, agora incluindo o centramento horizontal */
+@keyframes slideUpAndCenter {
+    from {
+      /* Combina o movimento vertical com o centramento horizontal */
+      transform: translateX(-50%) translateY(100%);
+      opacity: 0;
+    }
+    to {
+      /* Mantém o centramento horizontal ao final da animação */
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Estilo principal do container do banner */
+  .popup-banner {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    
+    /* A transformação inicial que será mantida/substituída pela animação.
+       Começa fora da tela e já centralizado. */
+    transform: translateX(-50%) translateY(100%);
+  
+    width: 100%;
+    max-width: 728px;
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1);
+    overflow: hidden;
+    
+    /* Inicia escondido */
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.5s, opacity 0.5s;
+  }
+  
+  /* Classe aplicada quando o banner deve ser visível */
+  .popup-banner.visible {
+    visibility: visible;
+    opacity: 1;
+    /* Usa a nova animação que mantém o centramento o tempo todo */
+    animation: slideUpAndCenter 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  
+  /* Estilo do link que envolve a imagem */
+  .popup-banner-link {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Estilo da imagem do banner */
+  .popup-banner-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Estilo do botão de fechar */
+  .popup-banner-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: var(--color-white);
+    border: none;
+    border-radius: 0 0 0 var(--border-radius-md);
+    font-size: var(--font-size-xl);
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+  }
+  
+  .popup-banner-close:hover {
+    background-color: var(--color-action);
+  }
+  
+  /* Ajustes para telas menores */
+  @media (max-width: 768px) {
+    .popup-banner {
+      max-width: 100%;
+      border-radius: 0;
+    }
+  }
+  

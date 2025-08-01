@@ -9,6 +9,7 @@ import '../components/blog/TagFilter.css';
 import BannerAd from '../components/BannerAd';
 import Pagination from '../components/Pagination';
 import BlogHeader from '../components/BlogHeader';
+import PopupBanner from '../components/PopupBanner';
 
 const strapiUrl = import.meta.env.VITE_API_URL;
 const PAGE_SIZE = 8;
@@ -149,6 +150,11 @@ const HomePage: React.FC = () => {
           <Pagination currentPage={currentPage} pageCount={pageCount} onPageChange={handlePageChange} />
         </>
       )}
+      <PopupBanner 
+        imageUrl="https://res.cloudinary.com/dvdwmeih3/image/upload/v1754059105/Sem_T%C3%ADtulo-1_le5aph.png" 
+        linkUrl="https://cursoperspectiva.com/" 
+        altText="Ad" 
+      />
     </div>
   );
 };
